@@ -6,3 +6,7 @@ export/
 *.csv
 *.npy
 
+
+\.idea/
+
+*.pyc
