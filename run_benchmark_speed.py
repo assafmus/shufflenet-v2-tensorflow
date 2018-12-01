@@ -23,11 +23,11 @@ init = tf.global_variables_initializer()
 times = []
 with tf.Session() as sess:
     sess.run(init)
-    for _ in range(60):
+    for _ in range(1050):
         start = time.time()
         _ = sess.run(logits)
         times.append(time.time() - start)
 
-times = np.array(times[10:]) / BATCH_SIZE
+times = np.array(times[50:]) / BATCH_SIZE
 print('images per second:', 1/times.mean())
 
