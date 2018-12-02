@@ -1,3 +1,4 @@
+import sys
 import cv2
 import json
 import numpy as np
@@ -50,6 +51,7 @@ variables_to_restore = ema.variables_to_restore()
 saver = tf.train.Saver(variables_to_restore)
 
 print "Running accuracy benchmark...",
+sys.stdout.flush()
 pred = []
 conf = []
 with tf.Session() as sess:
@@ -74,6 +76,8 @@ with open(csv_path, "w") as f:
         f.writelines("%s,%d,%f\n" % (im_path, p, c))
 
 print "Done"
+sys.stdout.flush()
+
 evaluate_csv(csv_path)
 
 
