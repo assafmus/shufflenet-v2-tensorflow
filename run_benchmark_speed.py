@@ -7,6 +7,8 @@ import time
 
 from architecture import shufflenet
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 tf.reset_default_graph()
 
 if True:
@@ -20,6 +22,7 @@ logits = shufflenet(random_batch, is_training=False, num_classes=40, depth_multi
 
 init = tf.global_variables_initializer()
 
+print "Running speed benchmark...",
 times = []
 with tf.Session() as sess:
     sess.run(init)
@@ -28,6 +31,7 @@ with tf.Session() as sess:
         _ = sess.run(logits)
         times.append(time.time() - start)
 
+print "Done"
 times = np.array(times[50:]) / BATCH_SIZE
-print('images per second:', 1/times.mean())
+print 'Images per second:', 1/times.mean()
 

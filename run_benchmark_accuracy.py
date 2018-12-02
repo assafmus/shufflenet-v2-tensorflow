@@ -1,18 +1,20 @@
-import os
 import cv2
 import json
 import numpy as np
 import tensorflow as tf
-
+from imagenet40 import get_db
 from architecture import shufflenet
 from input_pipeline import resize_keeping_aspect_ratio, central_crop
-
+from evaluation import evaluate_csv
 if True:
     DEPTH_MULTIPLIER = '1.0'
     SAVE_PATH = 'run01/model.ckpt-1661328'
 else:
     DEPTH_MULTIPLIER = '0.5'
     SAVE_PATH = 'run00/model.ckpt-1331064'
+
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 # Prepare benchmark information
@@ -25,13 +27,7 @@ with open('data/wordnet_decoder.json', 'r') as f:
 decoder = {i: wordnet_decoder[n] for n, i in encoding.items()}
 
 DB_PATH = '/data/imagenet40/val'
-classes = [x for x in sorted(os.listdir(DB_PATH))]
-tmp = [[os.path.join(DB_PATH, c, x) for x in sorted(os.listdir(os.path.join(DB_PATH,c)))] for c in classes]
-im_paths = []
-labels = []
-for l, t in enumerate(tmp):
-    im_paths.extend(t)
-    labels.extend([l] * len(t))
+im_paths, labels, classes = get_db(DB_PATH)
 
 classes_idx = [encoding[c] for c in classes]
 
@@ -53,7 +49,9 @@ ema = tf.train.ExponentialMovingAverage(decay=0.995)
 variables_to_restore = ema.variables_to_restore()
 saver = tf.train.Saver(variables_to_restore)
 
+print "Running accuracy benchmark...",
 pred = []
+conf = []
 with tf.Session() as sess:
     saver.restore(sess, SAVE_PATH)
 
@@ -68,12 +66,15 @@ with tf.Session() as sess:
         prob = np.exp(prob)
         prob = prob / np.sum(prob)
         pred.append(np.argmax(prob))
+        conf.append(np.max(prob))
 
+csv_path = "results.csv"
+with open(csv_path, "w") as f:
+    for im_path, p, c in zip(im_paths, pred, conf):
+        f.writelines("%s,%d,%f\n" % (im_path, p, c))
 
-labels = np.asarray(labels)
-pred = np.asarray(pred)
-
-print "Accuracy:", np.mean(pred == labels)
+print "Done"
+evaluate_csv(csv_path)
 
 
 
