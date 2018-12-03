@@ -8,13 +8,12 @@ import sys
 
 from architecture import shufflenet
 
-def benchmark_speed(DEPTH_MULTIPLIER):
+def benchmark_speed(DEPTH_MULTIPLIER, BATCH_SIZE):
     assert DEPTH_MULTIPLIER in ['1.0', '0.5']
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
     tf.reset_default_graph()
 
-    BATCH_SIZE = 32
     random_batch = tf.constant(np.random.randn(BATCH_SIZE, 224, 224, 3), dtype=tf.float32)
     logits = shufflenet(random_batch, is_training=False, num_classes=40, depth_multiplier=DEPTH_MULTIPLIER)
 
@@ -40,7 +39,8 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('model_width', type=str, help='model_width (1.0 / 0.5)')
+    parser.add_argument('--batch_size', '-b', type=int, help='batch size', default=32)
     args = parser.parse_args()
 
-    benchmark_speed(args.model_width)
+    benchmark_speed(args.model_width, args.batch_size)
 
