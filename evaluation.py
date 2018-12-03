@@ -17,7 +17,7 @@ def evaluate_csv(csv_path):
     pred_conf = [pred_conf[i] for i in idx]
 
     acc = sum([a==b for a, b in zip(labels, pred_labels)]) / float(len(labels))
-    print "Accuracy:", acc
+    print "Accuracy: %3.1f%%" % (acc*100)
 
 
 if __name__ == '__main__':
